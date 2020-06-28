@@ -1,12 +1,7 @@
-const https = require('https');
+const http = require('http');
 const fs = require('fs');
 
-const options = {
-  key: fs.readFileSync('key.pem'),
-  cert: fs.readFileSync('cert.pem')
-};
-
-https.createServer(options, function (req, res) {
+http.createServer(function (req, res) {
   res.writeHead(200);
   res.end("hello world\n");
 }).listen(process.env.PORT || 8000);

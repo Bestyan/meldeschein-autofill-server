@@ -112,12 +112,12 @@ module.exports = {
         const imap = new Imap(settings);
 
         imap.once('ready', () => {
-            callback(constants.getDataResponse({}));
+            callback(constants.getDataResponse({message: "Connection successful"}));
             imap.end();
         });
 
         imap.once('error', error => {
-            callback(constants.geterrorResponse(error));
+            callback(constants.getErrorResponse(error));
             imap.end();
         });
 

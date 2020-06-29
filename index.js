@@ -48,6 +48,32 @@ app.post('/fetch-mail', (request, response) => {
   }
 });
 
+/**
+ * expects the body to look like this:
+ *   {
+ *     settings: {
+ *       user: "mymail@mail.de",
+ *       password: "mypassword",
+ *       host: "my.imap.provider.com",
+ *       port: 993,
+ *       tls: true|false
+ *     }
+ *   }
+ */
+app.post('/test-connection', (request, response) => {
+  try {
+
+    email.testConnection(request.body.settings, responseData => {
+      response.json(responseData);
+    });
+
+  } catch (exception) {
+
+    response.json(constants.getErrorResponse(exception));
+
+  }
+});
+
 // process.env.PORT allows heroku to assign the port
 app.listen(process.env.PORT || 8000, () => {
   console.log("Server started");

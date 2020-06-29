@@ -45,8 +45,6 @@ module.exports = {
                     return;
                 }
 
-                console.log(box.messages.total + ' message(s) found!');
-
                 imap.seq.search([
                     ['FROM', from]
                 ], (error, results) => {

@@ -35,6 +35,8 @@ app.use(express.json());
  *   }
  */
 app.post('/fetch-mail', (request, response) => {
+
+  // this try catch should never trigger, but just in case
   try {
 
     email.fetchMails(request.body.settings, request.body.from, responseData => {
@@ -61,6 +63,8 @@ app.post('/fetch-mail', (request, response) => {
  *   }
  */
 app.post('/test-connection', (request, response) => {
+
+  // this try catch should never trigger, but just in case
   try {
 
     email.testConnection(request.body.settings, responseData => {
@@ -76,5 +80,11 @@ app.post('/test-connection', (request, response) => {
 
 // process.env.PORT allows heroku to assign the port
 app.listen(process.env.PORT || 8000, () => {
-  console.log("Server started");
+  console.log(`Server started (${new Date().toLocaleDateString("de-DE", {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit'
+})})`);
 });

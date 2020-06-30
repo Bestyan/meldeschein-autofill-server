@@ -15,8 +15,15 @@ const constants = require('./constants');
  */
 const app = express();
 
+const whitelist = ['chrome-extension://pjojnlcgehphaopbdokegphapkjemcfp', "chrome-extension://pgnbbjbgdibnhoiakimelpkpmckejiam"]
 app.use(cors({
-  origin: 'chrome-extension://pjojnlcgehphaopbdokegphapkjemcfp'
+  origin: (origin, callback) => {
+    if (whitelist.indexOf(origin) !== -1) {
+      callback(null, true)
+    } else {
+      callback(new Error('Not allowed by CORS'))
+    }
+  }
 }));
 app.use(express.json());
 

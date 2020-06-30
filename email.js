@@ -54,43 +54,55 @@ module.exports = {
                         return;
                     }
 
-                    // results is an array of the sequence numbers
-                    // create a dictionary that maps the sequence number to a deferred promise
-                    const deferredPromises = results.reduce((map, _) => {
-                        map[_] = generateDeferredPromise();
-                        return map;
-                    }, {});
-
-                    // fetch only the mails matching the sequence numbers returned by the search
-                    const fetch = imap.seq.fetch(results, {
-                        bodies: ''
-                    });
-
-                    fetch.on('message', (msg, sequence_number) => {
-                        msg.on('body', (stream, info) => {
-                            // resolve the promise belonging to the sequence number when parsed
-                            simpleParser(stream)
-                                .then(parsedMail => deferredPromises[sequence_number].resolve(parsedMail))
-                                .catch(error => deferredPromises[sequence_number].resolve(error));
-                        });
-                    });
-
-                    fetch.once('error', error => {
-                        callback(constants.getErrorResponse(error));
+                    if (!results || results.length === 0) {
+                        callback(constants.getDataResponse({
+                            mails: []
+                        }));
                         return;
-                    });
+                    }
 
-                    fetch.once('end', () => {
-                        imap.end();
-                    });
+                    try {
+                        // results is an array of the sequence numbers
+                        // create a dictionary that maps the sequence number to a deferred promise
+                        const deferredPromises = results.reduce((map, _) => {
+                            map[_] = generateDeferredPromise();
+                            return map;
+                        }, {});
 
-                    // wait for all mails to be parsed, then trigger callback
-                    Promise.all(
-                            Object.values(deferredPromises).map(deferred => deferred.promise)
-                        )
-                        .then(mails => callback(constants.getDataResponse({
-                            mails: mails
-                        })));
+                        // fetch only the mails matching the sequence numbers returned by the search
+                        const fetch = imap.seq.fetch(results, {
+                            bodies: ''
+                        });
+
+                        fetch.on('message', (msg, sequence_number) => {
+                            msg.on('body', (stream, info) => {
+                                // resolve the promise belonging to the sequence number when parsed
+                                simpleParser(stream)
+                                    .then(parsedMail => deferredPromises[sequence_number].resolve(parsedMail))
+                                    .catch(error => deferredPromises[sequence_number].resolve(error));
+                            });
+                        });
+
+                        fetch.once('error', error => {
+                            callback(constants.getErrorResponse(error));
+                            return;
+                        });
+
+                        fetch.once('end', () => {
+                            imap.end();
+                        });
+
+                        // wait for all mails to be parsed, then trigger callback
+                        Promise.all(
+                                Object.values(deferredPromises).map(deferred => deferred.promise)
+                            )
+                            .then(mails => callback(constants.getDataResponse({
+                                mails: mails
+                            })));
+                    } catch (exception) {
+                        callback(constants.getErrorResponse(exception));
+                        return;
+                    }
                 });
             });
         });
@@ -112,7 +124,9 @@ module.exports = {
         const imap = new Imap(settings);
 
         imap.once('ready', () => {
-            callback(constants.getDataResponse({message: "Connection successful"}));
+            callback(constants.getDataResponse({
+                message: "Connection successful"
+            }));
             imap.end();
         });
 

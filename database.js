@@ -10,69 +10,83 @@ module.exports = {
      * 
      * @param {*} firstname 
      * @param {*} gender 
-     * @param {function(error)} callback
      */
-    addFirstname(firstname, gender, callback) {
-        if (gender !== 'M' && gender !== 'F') {
-            callback("Gender is not 'F' or 'M'");
-            return;
-        }
-
-        this.firstnames.insert({
-            name: firstname,
-            gender: gender
-        }, (error, document) => {
-
-            if (error) {
-                console.log(`Trying to insert ${JSON.stringify({ name: firstname, gender: gender })}:`, error);
-                callback(error);
+    addFirstname(firstname, gender) {
+        return new Promise((resolve, reject) => {
+            if (gender !== 'M' && gender !== 'F') {
+                reject("Gender is not 'F' or 'M'");
                 return;
             }
 
-            console.log('Inserted', document.name, 'with ID', document._id);
-            callback();
-        });
+            if(!firstname){
+                reject("no name given");
+                return;
+            }
+
+            this.firstnames.insert({
+                name: firstname,
+                gender: gender
+            }, (error, document) => {
+
+                if (error) {
+                    console.log(`Trying to insert ${JSON.stringify({ name: firstname, gender: gender })}:`, error);
+                    reject(error);
+                    return;
+                }
+
+                console.log('Inserted', document.name, 'with ID', document._id);
+                resolve();
+            });
+        })
     },
 
     /**
      * 
      * @param {*} firstname 
-     * @param {function(JSON, error)} callback 
      */
-    getGender(firstname, callback) {
-        this.firstnames.findOne({
-            name: firstname
-        }, (error, document) => {
-            if (error) {
-                console.log(`Trying to find ${JSON.stringify({ name: firstname })}:`, error);
-                callback(null, error);
-                return;
+    getGender(firstname) {
+        return new Promise((resolve, reject) => {
+            if (!firstname) {
+                reject("no name given");
             }
 
-            callback(document);
-        });
+            this.firstnames.findOne({
+                name: firstname
+            }, (error, document) => {
+                if (error) {
+                    console.log(`Trying to find ${JSON.stringify({ name: firstname })}:`, error);
+                    reject(error);
+                    return;
+                }
+
+                resolve(document);
+            });
+        })
     },
 
     /**
      * 
      * @param {*} firstname 
-     * @param {function(error)} callback 
      */
-    deleteFirstname(firstname, callback) {
-        this.firstnames.remove({
-            name: firstname
-        }, {
-            multi: true
-        }, (error, numberDeleted) => {
-            if (error) {
-                console.log(`Trying to delete ${JSON.stringify({ name: firstname })}:`, error);
-                callback(error);
-                return;
-            }
+    deleteFirstname(firstname) {
+        return new Promise((resolve, reject) => {
 
-            console.log(`Deleted ${numberDeleted} entries in firstnames.db`);
-            callback();
+            this.firstnames.remove({
+                name: firstname
+            }, {
+                multi: true
+            }, (error, numberDeleted) => {
+                if (error) {
+                    console.log(`Trying to delete ${JSON.stringify({ name: firstname })}:`, error);
+                    reject(error);
+                    return;
+                }
+
+                console.log(`Deleted ${numberDeleted} entries (${JSON.stringify({ name: firstname })}) in firstnames.db`);
+                resolve();
+            });
         });
     }
+
 
 };

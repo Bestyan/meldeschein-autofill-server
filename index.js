@@ -27,6 +27,12 @@ app.use(cors({
 }));
 app.use(express.json());
 
+/**
+ * dummy path to wake the server from heroku sleep
+ */
+app.get('/wake-up', (request, response) => {
+  response.json(constants.getDataResponse("I am awake"));
+});
 
 /**
  * expects the body to look like this:

@@ -11,7 +11,7 @@ module.exports = {
      * @param {*} firstname 
      * @param {*} gender 
      */
-    addFirstname(firstname, gender) {
+    putFirstname(firstname, gender) {
         return new Promise((resolve, reject) => {
             if (gender !== 'M' && gender !== 'F') {
                 reject("Gender is not 'F' or 'M'");
@@ -44,7 +44,7 @@ module.exports = {
      * 
      * @param {*} firstname 
      */
-    getGender(firstname) {
+    getFirstname(firstname) {
         return new Promise((resolve, reject) => {
             if (!firstname) {
                 reject("no name given");

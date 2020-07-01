@@ -161,6 +161,9 @@ app.delete('/db/delete-firstname', (request, response) => {
         .catch(error => response.json(constants.getErrorResponse(error)));
 })
 
+// stuff to do before actually listening to requests
+db.init();
+
 // process.env.PORT allows heroku to assign the port
 app.listen(process.env.PORT || 8000, () => {
     console.log(`Server started (${new Date().toLocaleDateString("de-DE", {

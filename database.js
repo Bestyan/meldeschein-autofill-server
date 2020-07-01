@@ -6,6 +6,14 @@ module.exports = {
         autoload: true
     }),
 
+    init() {
+        // auto compaction once a week
+        this.firstnames.persistence.setAutocompactionInterval(7 * 24 * 60 * 1000);
+        this.firstnames.ensureIndex({
+            fieldName: "name"
+        }, error => console.log(error));
+    },
+
     /**
      * 
      * @param {*} firstname 
@@ -18,7 +26,7 @@ module.exports = {
                 return;
             }
 
-            if(!firstname){
+            if (!firstname) {
                 reject("no name given");
                 return;
             }

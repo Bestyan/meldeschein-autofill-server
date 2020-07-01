@@ -9,9 +9,37 @@ module.exports = {
     init() {
         // auto compaction once a week
         this.firstnames.persistence.setAutocompactionInterval(7 * 24 * 60 * 1000);
+        // set index on name
         this.firstnames.ensureIndex({
             fieldName: "name"
-        }, error => console.log(error));
+        }, error => {
+            if (error) console.log(error);
+        });
+
+        // initial population from json
+        this.firstnames.count({}, (error, number) => {
+
+            if (error) {
+                console.log(error);
+            }
+
+            if (number === 0) {
+
+                console.log("firstnames is empty. populating ...");
+
+                const initialData = require("./firstnames.json");
+                this.firstnames.insert(initialData, (error, documents) => {
+
+                    if (error) {
+                        console.log(error);
+                    }
+
+                    console.log("populating firstnames complete");
+
+                });
+            }
+
+        });
     },
 
     /**

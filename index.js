@@ -145,16 +145,16 @@ app.put('/db/put-firstname', (request, response) => {
  *   }
  */
 app.delete('/db/delete-firstname', (request, response) => {
-    const body = request.body;
-    if (!body || !body.name) {
-        response.json(constants.getErrorResponse("no data provided"));
+    const name = request.query.name;
+    if (!name) {
+        response.json(constants.getErrorResponse("no name parameter given. use ?name="));
         return;
     }
 
-    db.deleteFirstname(body.name)
+    db.deleteFirstname(name)
         .then(
             onFulfilled = () => response.json(constants.getDataResponse({
-                message: `successfully deleted "${body.name}"`
+                message: `successfully deleted "${name}"`
             })),
             onRejected = reason => response.json(constants.getErrorResponse(reason))
         )

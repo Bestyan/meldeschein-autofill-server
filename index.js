@@ -50,18 +50,10 @@ app.get('/wake-up', (request, response) => {
  */
 app.post('/fetch-mail', (request, response) => {
 
-    // this try catch should never trigger, but just in case
-    try {
+    email.fetchMails(request.body.settings, request.body.from)
+        .then(responseData => response.json(constants.getDataResponse(responseData)))
+        .catch(error => response.json(constants.getErrorResponse(error)));
 
-        email.fetchMails(request.body.settings, request.body.from, responseData => {
-            response.json(responseData);
-        });
-
-    } catch (exception) {
-
-        response.json(constants.getErrorResponse(exception));
-
-    }
 });
 
 /**
@@ -78,18 +70,10 @@ app.post('/fetch-mail', (request, response) => {
  */
 app.post('/test-connection', (request, response) => {
 
-    // this try catch should never trigger, but just in case
-    try {
+    email.testConnection(request.body.settings)
+        .then(responseData => response.json(constants.getDataResponse(responseData)))
+        .catch(error => response.json(constants.getErrorResponse(error)));
 
-        email.testConnection(request.body.settings, responseData => {
-            response.json(responseData);
-        });
-
-    } catch (exception) {
-
-        response.json(constants.getErrorResponse(exception));
-
-    }
 });
 
 /**
@@ -104,10 +88,7 @@ app.get('/db/get-firstname', (request, response) => {
     }
 
     db.getFirstname(name)
-        .then(
-            onFulfilled = document => response.json(constants.getDataResponse(document)),
-            onRejected = reason => response.json(constants.getErrorResponse(reason))
-        )
+        .then(document => response.json(constants.getDataResponse(document !== null ? document : "not in db")))
         .catch(error => response.json(constants.getErrorResponse(error)));
 
 });
@@ -128,12 +109,9 @@ app.put('/db/put-firstname', (request, response) => {
     }
 
     db.putFirstname(body.name, body.gender)
-        .then(
-            onFulfilled = () => response.json(constants.getDataResponse({
-                message: `successfully added "${body.name}"`
-            })),
-            onRejected = reason => response.json(constants.getErrorResponse(reason))
-        )
+        .then(() => response.json(constants.getDataResponse({
+            message: `successfully added "${body.name}"`
+        })))
         .catch(error => response.json(constants.getErrorResponse(error)));
 
 });
@@ -152,12 +130,9 @@ app.delete('/db/delete-firstname', (request, response) => {
     }
 
     db.deleteFirstname(name)
-        .then(
-            onFulfilled = () => response.json(constants.getDataResponse({
-                message: `successfully deleted "${name}"`
-            })),
-            onRejected = reason => response.json(constants.getErrorResponse(reason))
-        )
+        .then(() => response.json(constants.getDataResponse({
+            message: `successfully deleted "${name}"`
+        })))
         .catch(error => response.json(constants.getErrorResponse(error)));
 })
 

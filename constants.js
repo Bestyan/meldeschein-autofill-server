@@ -4,7 +4,7 @@ module.exports = {
         return {
             status: "error",
             error: exception.toString(),
-            data: {}
+            data: null
         };
     },
 

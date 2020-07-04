@@ -16,7 +16,11 @@ const db = require('./database');
  */
 const app = express();
 
-const whitelist = ['chrome-extension://pjojnlcgehphaopbdokegphapkjemcfp', "chrome-extension://pgnbbjbgdibnhoiakimelpkpmckejiam"]
+const whitelist = [
+    "chrome-extension://pgnbbjbgdibnhoiakimelpkpmckejiam", // store version
+    "chrome-extension://pjojnlcgehphaopbdokegphapkjemcfp", // local me
+    "chrome-extension://efgcphgecbopliofbjekeaaiiejbfnke", // local customer
+]
 app.use(cors({
     origin: (origin, callback) => {
         if (whitelist.indexOf(origin) !== -1) {

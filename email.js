@@ -25,7 +25,7 @@ module.exports = {
      * fetches all mails received from the given address
      * @param {string} from
      */
-    fetchMails(email_settings, from, callback) {
+    fetchMails(email_settings, from) {
 
         return new Promise((resolve, reject) => {
 

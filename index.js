@@ -3,6 +3,7 @@ const cors = require('cors');
 const email = require('./email');
 const constants = require('./constants');
 const db = require('./database');
+const geocoder = require('./geocoder');
 
 /**
  * all response objects follow this structure:
@@ -139,6 +140,34 @@ app.delete('/db/delete-firstname', (request, response) => {
         })))
         .catch(error => response.json(constants.getErrorResponse(error)));
 })
+
+/**
+ * response data looks like this:
+ *  {
+ *      country, city, state, zipcode, streetName, streetNumber
+ *  }
+ */
+app.get('/get-location', (request, response) => {
+
+    const locationString = request.query.location_string;
+    if (!locationString) {
+        response.json(constants.getErrorResponse("no location string given. use ?location_string="));
+        return;
+    }
+
+    geocoder.getLocation(locationString)
+        .then(locations => {
+            if (locations.length === 0) {
+                response.json(constants.getErrorResponse("no address found"));
+                return;
+            }
+
+            // if there are more than 1 location, only the first will make it back
+            response.json(constants.getDataResponse(locations[0]));
+        })
+        .catch(error => response.json(constants.getErrorResponse(error)));
+
+});
 
 // stuff to do before actually listening to requests
 db.init();

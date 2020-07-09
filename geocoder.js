@@ -3,8 +3,9 @@ const nodeGeocoder = require('node-geocoder');
 const geocoder = (() => {
 
     const options = {
-        provider: 'openstreetmap',
-        language: 'de'
+        provider: 'here',
+        language: 'de',
+        apiKey: '4dbi4DTBFX-FBRNEMp-2X4d9F67tmRtBmbzCrZNenmk'
     }
 
     return nodeGeocoder(options);

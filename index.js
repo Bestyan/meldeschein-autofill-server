@@ -17,6 +17,10 @@ const geocoder = require('./geocoder');
  */
 const app = express();
 
+// makes all files in static folder accessible
+app.use(express.static('static'));
+app.use(express.static('img'));
+
 const whitelist = [
     "chrome-extension://pgnbbjbgdibnhoiakimelpkpmckejiam", // store version
     "chrome-extension://pjojnlcgehphaopbdokegphapkjemcfp", // local me
@@ -27,7 +31,8 @@ app.use(cors({
         if (whitelist.indexOf(origin) !== -1) {
             callback(null, true)
         } else {
-            callback(new Error('Not allowed by CORS'))
+            console.log(`CORS denied. Origin: ${origin}`)
+            callback(null, false)
         }
     }
 }));

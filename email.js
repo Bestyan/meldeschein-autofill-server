@@ -104,6 +104,8 @@ module.exports = {
                                 }));
                         } catch (exception) {
                             reject(exception);
+                        } finally{
+                            imap.destroy();
                         }
                     });
                 });
@@ -111,6 +113,7 @@ module.exports = {
 
             imap.once('error', error => {
                 reject(error);
+                imap.destroy();
                 return;
             });
 
@@ -138,7 +141,7 @@ module.exports = {
 
             imap.once('error', error => {
                 reject(error);
-                imap.end();
+                imap.destroy();
             });
 
             imap.connect();

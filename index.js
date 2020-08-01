@@ -103,14 +103,6 @@ app.get('/db/get-firstname', (request, response) => {
 
 });
 
-app.get('/db/get-firstname-count', (request, response) => {
-
-    db.getFirstnameCount()
-        .then(number => response.json(constants.getDataResponse(number)))
-        .catch(error => response.json(constants.getErrorResponse(error)));
-
-});
-
 /**
  * expects the body to look like this:
  *   {

@@ -100,20 +100,6 @@ module.exports = {
         })
     },
 
-    getFirstnameCount() {
-        return new Promise((resolve, reject) => {
-            this.firstnames.count({}, (error, number) => {
-
-                if (error) {
-                    console.log(error);
-                    reject(error);
-                }
-
-                resolve({firstnames: number});
-            })
-        });
-    },
-
     /**
      * 
      * @param {*} firstname 

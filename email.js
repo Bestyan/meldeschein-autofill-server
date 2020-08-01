@@ -26,8 +26,10 @@ module.exports = {
      * @param {string} from
      */
     fetchMails(email_settings, from) {
+        console.log("fetching mails");
 
         return new Promise((resolve, reject) => {
+
 
             if (!email_settings.user ||
                 !email_settings.password ||
@@ -38,9 +40,19 @@ module.exports = {
                 return;
             }
 
+            if (from === '') {
+                resolve({
+                    mails: []
+                });
+                return;
+            }
+
             const imap = new Imap(email_settings);
 
             imap.once('ready', () => {
+
+                console.log("connection successful");
+
                 imap.openBox('INBOX', true, (error, box) => {
 
                     if (error) {
@@ -48,6 +60,7 @@ module.exports = {
                         return;
                     }
 
+                    console.log("inbox opened");
                     imap.seq.search([
                         ['FROM', from]
                     ], (error, results) => {
@@ -63,6 +76,9 @@ module.exports = {
                             });
                             return;
                         }
+
+                        console.log("found mails");
+                        console.log(results);
 
                         try {
                             // results is an array of the sequence numbers
@@ -97,14 +113,14 @@ module.exports = {
 
                             // wait for all mails to be parsed, then trigger callback
                             Promise.all(
-                                    Object.values(deferredPromises).map(deferred => deferred.promise)
-                                )
+                                Object.values(deferredPromises).map(deferred => deferred.promise)
+                            )
                                 .then(mails => resolve({
                                     mails: mails
                                 }));
                         } catch (exception) {
                             reject(exception);
-                        } finally{
+                        } finally {
                             imap.destroy();
                         }
                     });

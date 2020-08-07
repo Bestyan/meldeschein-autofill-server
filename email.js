@@ -112,16 +112,20 @@ module.exports = {
                             });
 
                             // wait for all mails to be parsed, then trigger callback
+                            console.log("waiting for mails to be loaded");
                             Promise.all(
                                 Object.values(deferredPromises).map(deferred => deferred.promise)
                             )
-                                .then(mails => resolve({
-                                    mails: mails
-                                }));
+                                .then(mails => {
+                                    console.log("loaded!");
+                                    resolve({
+                                        mails: mails
+                                    });
+                                });
                         } catch (exception) {
                             reject(exception);
-                        } finally {
                             imap.destroy();
+                            return;
                         }
                     });
                 });

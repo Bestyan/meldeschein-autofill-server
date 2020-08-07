@@ -6,7 +6,7 @@
   "author": "Bastian Schattenberg <git@bestyan.de>",
   "license": "MIT",
   "scripts": {
-    "start": "node --max_old_space_size=2560 index.js",
+    "start": "node index.js",
     "heroku:": "git push heroku master"
   },
   "dependencies": {

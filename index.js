@@ -57,10 +57,21 @@ app.get('/wake-up', (request, response) => {
  *       tls: true|false
  *     }
  *   }
+ * @deprecated
  */
 app.post('/fetch-mail', (request, response) => {
 
-    email.fetchMails(request.body.settings, request.body.from)
+    email.fetchMailsFrom(request.body.settings, request.body.from, "")
+        .then(responseData => response.json(constants.getDataResponse(responseData)))
+        .catch(error => response.json(constants.getErrorResponse(error)));
+
+});
+
+app.post('/fetch-all-mails', (request, response) => {
+
+    const {settings, from, firstname, lastname} = request.body;
+
+    email.fetchAllMails(settings, from, firstname, lastname)
         .then(responseData => response.json(constants.getDataResponse(responseData)))
         .catch(error => response.json(constants.getErrorResponse(error)));
 

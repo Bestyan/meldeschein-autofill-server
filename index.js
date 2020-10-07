@@ -190,7 +190,7 @@ app.get('/get-location', (request, response) => {
 
 app.get('/process-emails', (request, response) => {
     chiemgaukarte.processEmails()
-    .then(() => response.json(constants.getDataResponse("emails processed")))
+    .then(numberProcessed => response.json(constants.getDataResponse(`${numberProcessed} emails processed`)))
     .catch(error => response.json(constants.getErrorResponse(error)));
 })
 
@@ -198,7 +198,7 @@ app.get('/process-emails', (request, response) => {
 // run processEmails once per hour
 const chiemgaukartenSchedule = schedule.scheduleJob('* * /1 * * *', () => {
     console.log(`running scheduled processEmails (${new Date()})`);
-    chiemgaukarte.processEmails();
+    chiemgaukarte.processEmails().catch(error => console.log(error));
 })
 
 // stuff to do before actually listening to requests

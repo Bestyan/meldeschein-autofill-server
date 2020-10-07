@@ -163,7 +163,7 @@ const createDrafts = mails => {
 
 const saveDrafts = drafts => {
 
-    if(drafts.length === 0){
+    if (drafts.length === 0) {
         return;
     }
 
@@ -184,7 +184,7 @@ const saveDrafts = drafts => {
 };
 
 const moveProcessed = mails => {
-    if(mails.length === 0){
+    if (mails.length === 0) {
         return;
     }
 
@@ -198,15 +198,18 @@ module.exports = {
     processEmails: function () {
 
         let mailsToProcess = [];
-        return fetchFromCatchAll()
-            .then(mails => mails.mails)
-            .then(mails => {
-                mailsToProcess = mails;
-                return createDrafts(mails);
-            })
-            .then(drafts => saveDrafts(drafts))
-            .then(() => moveProcessed(mailsToProcess))
-            .catch(error => console.log(error));
+        return new Promise((resolve, reject) => {
+            fetchFromCatchAll()
+                .then(mails => mails.mails)
+                .then(mails => {
+                    mailsToProcess = mails;
+                    return createDrafts(mails);
+                })
+                .then(drafts => saveDrafts(drafts))
+                .then(() => moveProcessed(mailsToProcess))
+                .then(() => resolve(mailsToProcess.length))
+                .catch(error => reject(error));
+        });
 
     }
 

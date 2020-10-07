@@ -5,6 +5,9 @@ const constants = require('./constants');
 const db = require('./database');
 const geocoder = require('./geocoder');
 
+const schedule = require('node-schedule');
+const chiemgaukarte = require('./chiemgaukarte');
+
 /**
  * all response objects follow this structure:
  *  {
@@ -69,7 +72,7 @@ app.post('/fetch-mail', (request, response) => {
 
 app.post('/fetch-all-mails', (request, response) => {
 
-    const {settings, from, firstname, lastname} = request.body;
+    const { settings, from, firstname, lastname } = request.body;
 
     email.fetchAllMails(settings, from, firstname, lastname)
         .then(responseData => response.json(constants.getDataResponse(responseData)))
@@ -185,16 +188,29 @@ app.get('/get-location', (request, response) => {
 
 });
 
+app.get('/process-emails', (request, response) => {
+    chiemgaukarte.processEmails()
+    .then(() => response.json(constants.getDataResponse("emails processed")))
+    .catch(error => response.json(constants.getErrorResponse(error)));
+})
+
+
+// run processEmails once per hour
+const chiemgaukartenSchedule = schedule.scheduleJob('* * /1 * * *', () => {
+    console.log(`running scheduled processEmails (${new Date()})`);
+    chiemgaukarte.processEmails();
+})
+
 // stuff to do before actually listening to requests
 db.init();
 
 // process.env.PORT allows heroku to assign the port
 app.listen(process.env.PORT || 8000, () => {
     console.log(`Server started (${new Date().toLocaleDateString("de-DE", {
-    day: '2-digit',
-    month: '2-digit',
-    year: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit'
-})})`);
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+    })})`);
 });

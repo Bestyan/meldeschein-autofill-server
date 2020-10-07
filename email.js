@@ -6,7 +6,7 @@ const simpleParser = require('mailparser').simpleParser;
 
 module.exports = {
 
-    fetchAllMails(email_settings, from, firstname, lastname) {
+    fetchAllMails(emailSettings, from, firstname, lastname) {
 
         return new Promise((resolve, reject) => {
 
@@ -23,7 +23,7 @@ module.exports = {
 
                 // fetch mails separately
                 from.forEach(email => {
-                    this.fetchMailsFrom(email_settings, email, "")
+                    this.fetchMailsFrom(emailSettings, email, "")
                         .then(mails => promises[email].resolve(mails))
                         .catch(error => promises[email].resolve(error));
                 });
@@ -31,7 +31,7 @@ module.exports = {
                 // fetch mails from booking.com that have their first and last name in the subject
                 if (hasBookingCom) {
                     promises[bookingComEmail] = util.generateDeferredPromise();
-                    this.fetchMailsFrom(email_settings, bookingComEmail, `${firstname} ${lastname}`)
+                    this.fetchMailsFrom(emailSettings, bookingComEmail, `${firstname} ${lastname}`)
                         .then(mails => promises[bookingComEmail].resolve(mails))
                         .catch(error => promises[bookingComEmail].resolve(error));
                 }
@@ -65,17 +65,17 @@ module.exports = {
      * fetches all mails received from the given address
      * @param {string} from
      */
-    fetchMailsFrom(email_settings, from, subject) {
+    fetchMailsFrom(emailSettings, from, subject) {
         console.log("fetching mails");
 
         return new Promise((resolve, reject) => {
 
 
-            if (!email_settings.user ||
-                !email_settings.password ||
-                !email_settings.host ||
-                !email_settings.port ||
-                typeof email_settings.tls === 'undefined') {
+            if (!emailSettings.user ||
+                !emailSettings.password ||
+                !emailSettings.host ||
+                !emailSettings.port ||
+                typeof emailSettings.tls === 'undefined') {
                 reject("incomplete login data");
                 return;
             }
@@ -87,7 +87,7 @@ module.exports = {
                 return;
             }
 
-            const imap = new Imap(email_settings);
+            const imap = new Imap(emailSettings);
 
             imap.once('ready', () => {
 
@@ -135,12 +135,30 @@ module.exports = {
                             });
 
                             fetch.on('message', (msg, sequence_number) => {
+                                // create deferred promises
+                                let mailPromise = util.generateDeferredPromise();
+                                let uidPromise = util.generateDeferredPromise();
+
+                                // mail body - resolve promise when done
                                 msg.on('body', (stream, info) => {
-                                    // resolve the promise belonging to the sequence number when parsed
                                     simpleParser(stream)
-                                        .then(parsedMail => deferredPromises[sequence_number].resolve(parsedMail))
-                                        .catch(error => deferredPromises[sequence_number].resolve(error));
+                                        .then(parsedMail => mailPromise.resolve(parsedMail))
                                 });
+
+                                // mail uid - resolve when done
+                                msg.once('attributes', function (attrs) {
+                                    uidPromise.resolve(attrs.uid);
+                                });
+
+                                // resolve the promise belonging to the sequence number when the body and the uid are available
+                                Promise.all([mailPromise.promise, uidPromise.promise])
+                                    .then(values => {
+                                        const mail = values[0];
+                                        const uid = values[1];
+                                        mail.uid = uid;
+                                        deferredPromises[sequence_number].resolve(mail);
+                                    })
+                                    .catch(error => console.log(error));
                             });
 
                             fetch.once('error', error => {
@@ -184,6 +202,86 @@ module.exports = {
 
     },
 
+    save(emailSettings, email, folder) {
+        return new Promise((resolve, reject) => {
+            const imap = new Imap(emailSettings);
+            imap.once('ready', function () {
+                imap.openBox(folder, false, (error, box) => {
+                    if (error) {
+                        reject(error);
+                        return;
+                    }
+
+                    imap.append(email);
+                })
+            });
+
+            imap.once('error', error => {
+                reject(error);
+                imap.destroy();
+                return;
+            });
+
+            imap.connect();
+        });
+    },
+
+    /**
+     * move the given mails from one folder to another
+     * @param {*} emailSettings 
+     * @param {*} mails 
+     * @param {*} fromFolder 
+     * @param {*} toFolder 
+     */
+    move(emailSettings, mails, fromFolder, toFolder) {
+        return new Promise((resolve, reject) => {
+
+            const imap = new Imap(emailSettings);
+
+            imap.once('ready', () => {
+
+                imap.openBox(fromFolder, false, (error, box) => {
+
+                    if (error) {
+                        reject(error);
+                        return;
+                    }
+
+                    // create a promise for each mail
+                    const promises = mails.reduce((map, _) => {
+                        map[_] = util.generateDeferredPromise();
+                        return map;
+                    }, {});
+
+                    // move mails
+                    mails.forEach(mail => imap.move(mail.uid, toFolder, error => {
+                        if (error) {
+                            console.log(error);
+                            reject(error);
+                            return;
+                        }
+                        promises[mail].resolve();
+                    }));
+
+                    // resolve promise when all mails have been moved
+                    Promise.all(
+                        Object.entries(promises).map(deferred => deferred.promise)
+                    ).then(() => resolve());
+
+                });
+            });
+
+            imap.once('error', error => {
+                reject(error);
+                imap.destroy();
+                return;
+            });
+
+            imap.connect();
+
+        });
+    },
+
     /**
      * Tries to login with given settings
      * @param {*} settings 
@@ -204,6 +302,25 @@ module.exports = {
                 reject(error);
                 imap.destroy();
             });
+
+            imap.connect();
+        });
+    },
+
+    getFolderNames(settings) {
+        return new Promise((resolve, reject) => {
+            const imap = new Imap(settings);
+
+            imap.once('ready', () => {
+                imap.getBoxes((error, boxes) => {
+                    if (error) {
+                        reject(error);
+                        return;
+                    }
+
+                    resolve(boxes);
+                })
+            })
 
             imap.connect();
         });

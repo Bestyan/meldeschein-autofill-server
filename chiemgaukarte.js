@@ -93,10 +93,10 @@ const emailSettings = {
 };
 
 /**
- * fetches all mails from info@inzell.de that are in the inbox
+ * fetches all mails from service@emeldeschein.de that are in the inbox
  */
 const fetchFromCatchAll = () => {
-    return email.fetchMailsFrom(emailSettings, "info@inzell.de", "");
+    return email.fetchMailsFrom(emailSettings, "service@emeldeschein.de", "");
 };
 
 /**

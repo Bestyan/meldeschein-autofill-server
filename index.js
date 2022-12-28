@@ -26,7 +26,7 @@ app.use(express.static('img'));
 
 const whitelist = [
     "chrome-extension://pgnbbjbgdibnhoiakimelpkpmckejiam", // store version
-    "chrome-extension://pjojnlcgehphaopbdokegphapkjemcfp", // local me
+    "chrome-extension://bmcnmdjgbmhdoppbbbceahdobipffigb", // local me
     "chrome-extension://efgcphgecbopliofbjekeaaiiejbfnke", // local customer
 ]
 app.use(cors({
@@ -121,7 +121,7 @@ app.get('/db/get-firstname', (request, response) => {
  * expects the body to look like this:
  *   {
  *      name: "Peter",
- *      gender: "M"
+ *      gender: "M"|"F"
  *   }
  */
 app.put('/db/put-firstname', (request, response) => {
@@ -149,7 +149,7 @@ app.put('/db/put-firstname', (request, response) => {
 app.delete('/db/delete-firstname', (request, response) => {
     const name = request.query.name;
     if (!name) {
-        response.json(constants.getErrorResponse("no name parameter given. use ?name="));
+        response.json(constants.getErrorResponse(`query parameter "name" missing. use ?name=`));
         return;
     }
 
@@ -170,7 +170,7 @@ app.get('/get-location', (request, response) => {
 
     const locationString = request.query.location_string;
     if (!locationString) {
-        response.json(constants.getErrorResponse("no location string given. use ?location_string="));
+        response.json(constants.getErrorResponse(`query parameter "location_string" missing. use ?location_string=`));
         return;
     }
 
@@ -190,8 +190,8 @@ app.get('/get-location', (request, response) => {
 
 app.get('/process-emails', (request, response) => {
     chiemgaukarte.processEmails()
-    .then(numberProcessed => response.json(constants.getDataResponse(`${numberProcessed} emails processed`)))
-    .catch(error => response.json(constants.getErrorResponse(error)));
+        .then(numberProcessed => response.json(constants.getDataResponse(`${numberProcessed} emails processed`)))
+        .catch(error => response.json(constants.getErrorResponse(error)));
 })
 
 

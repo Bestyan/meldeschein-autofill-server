@@ -6,17 +6,11 @@
   "author": "Bastian Schattenberg <git@bestyan.de>",
   "license": "MIT",
   "scripts": {
-    "start": "node index.js",
-    "heroku:": "git push heroku master"
+    "start": "node index.js"
   },
   "dependencies": {
     "cors": "^2.8.5",
     "express": "^4.18.2",
-    "imap": "^0.8.19",
-    "mailparser": "^3.6.2",
-    "mimemessage": "^1.0.5",
-    "nedb": "^1.8.0",
-    "node-geocoder": "^4.2.0",
-    "node-schedule": "^2.1.0"
+    "nedb": "^1.8.0"
   }
 }

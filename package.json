@@ -1,0 +1,16 @@
+{
+  "name": "meldeschein-autofill-server",
+  "version": "0.0.1",
+  "main": "index.js",
+  "repository": "https://github.com/Bestyan/meldeschein-autofill-server.git",
+  "author": "Bastian Schattenberg <git@bestyan.de>",
+  "license": "MIT",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.18.2",
+    "nedb": "^1.8.0"
+  }
+}
